@@ -36,7 +36,7 @@ def get_year_by_year_data(outfile):
 
 if __name__ == '__main__':
     argv = sys.argv
-    if len(argv < 1):
+    if len(argv) < 1:
         print('Please specify file to dump data')
         sys.exit(1)
     
