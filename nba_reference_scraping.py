@@ -7,7 +7,7 @@ from requests.exceptions import HTTPError
 url = 'https://www.basketball-reference.com/playoffs/series.html'
 
 # Columns of our output dataframe
-columns = ['Winner', 'Loser', 'Margin', 'Year']
+columns = ['Winner', 'Winner Seed', 'Winner Wins', 'Loser', 'Loser Seed', 'Loser Wins','Margin', 'Series', 'Year']
 
 def get_playoff_data():
     data = None
@@ -16,7 +16,7 @@ def get_playoff_data():
         print('Fetching playoff data')
         response = requests.get(url)
         response.raise_for_status()
-        
+    
         # Parse the returned html into formatted DataFrame
         data = parse_document(response.text)
     except HTTPError as http_err:
@@ -41,25 +41,32 @@ def parse_document(html):
 
 def parse_point(row):
     # Pattern for removign all non-alpha characters
-    regex = re.compile('[^a-zA-Z\s]')
+    alpha_regex = re.compile('[^a-zA-Z\s]')
+    seed_regex = re.compile('\((\d)\)')
     row = pq(row)
 
     # Parse the data we want from the row
     winner = row('td[data-stat="winner"]').text()
     loser = row('td[data-stat="loser"]').text()
-    winner_wins = row('td[data-stat="wins_winner"]').text()
-    lower_wins = row('td[data-stat="wins_loser"]').text()
+    winner_wins = int(row('td[data-stat="wins_winner"]').text())
+    loser_wins = int(row('td[data-stat="wins_loser"]').text())
     year = row('th[data-stat="season"]').text()
+    series = row('td[data-stat="series"]').text()
 
     # Super advanced calulation here for win margin
-    margin = int(winner_wins) - int(lower_wins)
+    margin = int(winner_wins) - int(loser_wins)
 
-    # Clean up our strings
-    winner = regex.sub('', winner).strip()
-    loser = regex.sub('', loser).strip()
+    # Clean up our strings and parse seeds
+    winner_seed = seed_regex.search(winner)
+    winner_seed = winner_seed.group(1) if winner_seed else None
+    loser_seed = seed_regex.search(winner)
+    loser_seed = loser_seed.group(1) if loser_seed else None
+    winner = alpha_regex.sub('', winner).strip()
+    loser = alpha_regex.sub('', loser).strip()
+    
 
     # Return our datapoint as ordered array of fields
-    return [winner, loser, margin, year]
+    return [winner, winner_seed, winner_wins, loser, loser_seed, loser_wins, margin, series, year]
 
 
 
