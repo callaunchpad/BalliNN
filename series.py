@@ -13,35 +13,19 @@ from sklearn.neural_network import MLPClassifier as MLP
 from sklearn.tree import DecisionTreeClassifier
 from utils import normalize_by_year, season_to_playoff_year, tune_classifier
 
+from data_preprocessing import joined_data as 
+
 warnings.filterwarnings(action='ignore', category=ConvergenceWarning)
 
-# read datasets
-series_data = feather.read_dataframe('series.data')
-year_data = feather.read_dataframe('year.data')
-
-# normalize year-by-year data
-drop_names = ['CONF_COUNT', 'DIV_COUNT', 'TEAM_ID', 'TEAM_CITY', 'TEAM_NAME', 'NBA_FINALS_APPEARANCE']
-year_data = normalize_by_year(year_data, not_considering=drop_names)
-
-# join series and year-by-year datasets
-year_data['TEAM_FULLNAME'] = year_data['TEAM_CITY'] + ' ' + year_data['TEAM_NAME']
-year_data['PLAYOFF_YEAR'] = year_data['YEAR'].map(season_to_playoff_year)
-
-winner_join = series_data.merge(year_data, left_on=['Winner', 'Year'], right_on=['TEAM_FULLNAME', 'PLAYOFF_YEAR'])
-loser_join = series_data.merge(year_data, left_on=['Loser', 'Year'], right_on=['TEAM_FULLNAME', 'PLAYOFF_YEAR'])
-data_join = winner_join.merge(loser_join, on=['Winner', 'Loser', 'Margin', 'Year', 'PLAYOFF_YEAR'])
 
 # drop unnecessary data
-drop_names = ['CONF_COUNT', 'DIV_COUNT', 'TEAM_ID', 'TEAM_CITY', 'TEAM_NAME', 'YEAR', 'TEAM_FULLNAME', 'NBA_FINALS_APPEARANCE']
-total_drop_names = []
-for name in drop_names:
-    total_drop_names.extend([name+'_x',name+'_y'])
-total_drop_names.extend(['Winner', 'Loser', 'Year', 'PLAYOFF_YEAR'])
-data = data_join.drop(total_drop_names, axis=1)
+#TODO
+total_drop_names = ??
+data = joined_data.drop(total_drop_names, axis=1)
 
 # extract features and labels
-X = data.drop(['Margin'], axis=1)
-y = data['Margin']
+X = data.drop(['Normalized_Margin'], axis=1)
+y = data['Normalized_Margin']
 
 # models
 Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.25)
