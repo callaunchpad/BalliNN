@@ -40,6 +40,7 @@ if __name__ == '__main__':
         print('Please specify file to dump data')
         sys.exit(1)
 
+
     fname = sys.argv[1]
     get_year_by_year_data(fname)
 
