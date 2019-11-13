@@ -21,6 +21,8 @@ year_data = pd.merge(year_data, year_data, on='PLAYOFF_YEAR', suffixes=('_winner
 # Join with our playoff results data
 joined_data = pd.merge(year_data, series_data, left_on=['TEAM_FULLNAME_winner', 'TEAM_FULLNAME_loser', 'PLAYOFF_YEAR'], right_on=['Winner', 'Loser', 'Year'], how='inner')
 
+# Remove tiebreaker rounds from the ancient days
+joined_data = joined_data[joined_data['Winner Wins'] != 1]
 
 # Calculate the home team for each series
 def calc_home_team(row):
@@ -33,7 +35,8 @@ joined_data['home_team'] = joined_data.apply(calc_home_team, axis=1)
 # Normalize the margin by the number of games played in the series
 # Store this for later because pairwise_subtract removes this column
 normalize_margins = joined_data['Margin'] / (joined_data['Winner Wins'] * 2 - 1)
-
+print(joined_data[['home_team', 'PLAYOFF_YEAR', 'Margin', 'Winner Wins']])
+print(normalize_margins)
 def pairwise_subtract(row):
     # Parse all numerical winner team stats
     winner_stats = row.filter(regex='_winner$')
