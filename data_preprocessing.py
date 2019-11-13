@@ -29,9 +29,10 @@ def calc_home_team(row):
     return row['Winner'] if row['Winner Seed'] > row['Loser Seed'] else row['Loser']
 
 joined_data['home_team'] = joined_data.apply(calc_home_team, axis=1)
-print(joined_data.columns)
+
 # Normalize the margin by the number of games played in the series
-joined_data['Normalized_Margin'] = joined_data['Margin'] / (joined_data['WINS_winner'] * 2 - 1)
+# Store this for later because pairwise_subtract removes this column
+normalize_margins = joined_data['Margin'] / (joined_data['Winner Wins'] * 2 - 1)
 
 def pairwise_subtract(row):
     # Parse all numerical winner team stats
@@ -58,3 +59,6 @@ def pairwise_subtract(row):
 
 # Pairwise subtract home team stats from away team stats
 joined_data = joined_data.apply(pairwise_subtract, axis=1, result_type='expand')
+
+# Add in the Normalized_Margin column
+joined_data['Normalized_Margin'] = normalize_margins
