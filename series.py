@@ -80,6 +80,7 @@ dt_model = DecisionTreeRegressor()
 dt_model.fit(Xtr, ytr)
 print("MAE:", metrics.mean_absolute_error(yte, dt_model.predict(Xte)))
 
+
 # Weird Stuff that some Kaggle guy said to try
 # lab_enc = preprocessing.LabelEncoder()
 # training_scores_encoded = lab_enc.fit_transform(ytr)
