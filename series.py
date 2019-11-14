@@ -25,13 +25,13 @@ warnings.filterwarnings(action='ignore', category=ConvergenceWarning)
 
 
 # drop unnecessary data
-total_drop_names = ['TEAM_ID_winner', 'GP_winner', 'WINS_winner', 'LOSSES_winner',  'CONF_RANK_winner', 'DIV_RANK_winner',  'PO_WINS_winner', 'PO_LOSSES_winner', 'PTS_RANK_winner']
+total_drop_names = ['TEAM_ID_winner', 'GP_winner', 'WINS_winner', 'LOSSES_winner',  'CONF_RANK_winner', 'DIV_RANK_winner',  'PO_WINS_winner', 'PO_LOSSES_winner', 'PTS_RANK_winner', 'Series', 'Winner', 'Loser', 'home_team', 'DIV_COUNT_winner']
 data = joined_data.drop(total_drop_names, axis=1)
 
 # extract features and labels
 # CHANGE THIS: Dropped columns with nan values because the models didn't like them
-X = data.drop(['Normalized_Margin'], axis=1).dropna(axis=1, how='any')
-y = data['Normalized_Margin'].values
+X = data.drop(['Normalized_margin'], axis=1).dropna(axis=1, how='any')
+y = data['Normalized_margin'].values
 
 # models
 Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.25)
@@ -64,9 +64,9 @@ print("MAE:", metrics.mean_absolute_error(yte, y_pred))
 print("Training MLP Regression")
 # These params (taken from above) made it worse (0.21 w params vs 0.17 wo params)
 params = {
-    'hidden_layer_sizes' : (8,),
-    'alpha' : 1e-2,
-    'max_iter' : 500,
+    'hidden_layer_sizes' : (20,),
+    'alpha' : 0.5e-3,
+    'max_iter' : 3000,
     'verbose' : False
 }
 mlp_model = MLPRegressor(**params)
