@@ -59,7 +59,7 @@ def parse_point(row):
     # Clean up our strings and parse seeds
     winner_seed = seed_regex.search(winner)
     winner_seed = winner_seed.group(1) if winner_seed else None
-    loser_seed = seed_regex.search(winner)
+    loser_seed = seed_regex.search(loser)
     loser_seed = loser_seed.group(1) if loser_seed else None
     winner = alpha_regex.sub('', winner).strip()
     loser = alpha_regex.sub('', loser).strip()

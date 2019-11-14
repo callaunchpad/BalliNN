@@ -28,22 +28,20 @@ joined_data = joined_data[joined_data['Winner Wins'] != 1]
 def calc_home_team(row):
     if row['Series'] == 'Finals' or not row['Winner Seed'] or not row['Loser Seed']:
         return row['Winner'] if row['WINS_winner'] > row['WINS_loser'] else row['Loser']
-    return row['Winner'] if row['Winner Seed'] > row['Loser Seed'] else row['Loser']
+    return row['Winner'] if row['Winner Seed'] < row['Loser Seed'] else row['Loser']
 
 joined_data['home_team'] = joined_data.apply(calc_home_team, axis=1)
 
 # Normalize the margin by the number of games played in the series
 # Store this for later because pairwise_subtract removes this column
-normalize_margins = joined_data['Margin'] / (joined_data['Winner Wins'] * 2 - 1)
-print(joined_data[['home_team', 'PLAYOFF_YEAR', 'Margin', 'Winner Wins']])
-print(normalize_margins)
+joined_data['Normalized_margin'] = joined_data['Margin'] / (joined_data['Winner Wins'] * 2 - 1)
 def pairwise_subtract(row):
     # Parse all numerical winner team stats
     winner_stats = row.filter(regex='_winner$')
     winner_stats = winner_stats[winner_stats.apply(lambda x: type(x) in [int, np.int64, float, np.float64])]
 
     # Save our column names as they will be dropped to make this work
-    cols = winner_stats.index
+    cols = list(winner_stats.index)
     winner_stats.reset_index(drop=True, inplace=True)
 
     # Parse all numberical loser team stats
@@ -54,14 +52,20 @@ def pairwise_subtract(row):
     # Subtract winner from loser
     pairwise = winner_stats.subtract(loser_stats)
 
+    pairwise['Normalized_margin'] = row['Normalized_margin']
+    cols.append('Normalized_margin')
+
     # Negate if necessary
     if row['home_team'] == row['Loser']:
         pairwise = -1*pairwise
+    
+    additional_cols = ['Series', 'Year', 'home_team', 'Winner', 'Loser']
+    for col in additional_cols:
+        pairwise[col] = row[col]
+
+    cols.extend(additional_cols)
     
     return pd.Series(pairwise.values, index=cols)
 
 # Pairwise subtract home team stats from away team stats
 joined_data = joined_data.apply(pairwise_subtract, axis=1, result_type='expand')
-
-# Add in the Normalized_Margin column
-joined_data['Normalized_Margin'] = normalize_margins

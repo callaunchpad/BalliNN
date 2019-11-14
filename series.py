@@ -25,7 +25,6 @@ warnings.filterwarnings(action='ignore', category=ConvergenceWarning)
 
 
 # drop unnecessary data
-#TODO
 total_drop_names = ['TEAM_ID_winner', 'GP_winner', 'WINS_winner', 'LOSSES_winner',  'CONF_RANK_winner', 'DIV_RANK_winner',  'PO_WINS_winner', 'PO_LOSSES_winner', 'PTS_RANK_winner']
 data = joined_data.drop(total_drop_names, axis=1)
 
