@@ -11,6 +11,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier as MLP
 from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.neural_network import MLPRegressor
 from sklearn import metrics
 
 from sklearn.tree import DecisionTreeClassifier
@@ -57,7 +59,26 @@ print("Training Linear Regression")
 linear_model = LinearRegression()
 linear_model.fit(Xtr, ytr)
 y_pred = linear_model.predict(Xte)
-print('Mean Absolute Error:', metrics.mean_absolute_error(yte, y_pred))  
+print("MAE:", metrics.mean_absolute_error(yte, y_pred))  
+
+# MLP Regresion
+print("Training MLP Regression")
+# These params (taken from above) made it worse (0.21 w params vs 0.17 wo params)
+params = {
+    'hidden_layer_sizes' : (8,),
+    'alpha' : 1e-2,
+    'max_iter' : 500,
+    'verbose' : False
+}
+mlp_model = MLPRegressor(**params)
+mlp_model.fit(Xtr, ytr)
+print("MAE:", metrics.mean_absolute_error(yte, mlp_model.predict(Xte)))
+
+# DT Regression
+print("Training DT Regression")
+dt_model = DecisionTreeRegressor()
+dt_model.fit(Xtr, ytr)
+print("MAE:", metrics.mean_absolute_error(yte, dt_model.predict(Xte)))
 
 # Weird Stuff that some Kaggle guy said to try
 # lab_enc = preprocessing.LabelEncoder()
