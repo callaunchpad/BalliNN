@@ -12,6 +12,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.neural_network import MLPClassifier as MLP
 from sklearn.linear_model import LinearRegression
 from sklearn.tree import DecisionTreeRegressor
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn import metrics
 
@@ -19,19 +20,26 @@ from sklearn.tree import DecisionTreeClassifier
 from utils import normalize_by_year, season_to_playoff_year, tune_classifier
 from sklearn import preprocessing
 from sklearn.utils import multiclass
-from data_preprocessing import joined_data 
+# from data_preprocessing import joined_data 
 
 warnings.filterwarnings(action='ignore', category=ConvergenceWarning)
 
+joined_data = feather.read_dataframe('joined_data.data')
 
 # drop unnecessary data
-total_drop_names = ['TEAM_ID_winner', 'GP_winner', 'WINS_winner', 'LOSSES_winner',  'CONF_RANK_winner', 'DIV_RANK_winner',  'PO_WINS_winner', 'PO_LOSSES_winner', 'PTS_RANK_winner', 'Series', 'Winner', 'Loser', 'home_team', 'DIV_COUNT_winner']
+total_drop_names = ['TEAM_ID_winner', 'GP_winner', 'WINS_winner', 'LOSSES_winner',  'CONF_RANK_winner', 'DIV_RANK_winner',  'PO_WINS_winner', 'PO_LOSSES_winner', 'PTS_RANK_winner', 'Series', 'Winner', 'Loser', 'home_team', 'DIV_COUNT_winner', 'Year', 'CONF_COUNT_winner']
 data = joined_data.drop(total_drop_names, axis=1)
 
+sample_point = joined_data[(joined_data['Year'] == '2019') & (joined_data['Winner'] == 'Toronto Raptors') & (joined_data['Loser'] == 'Orlando Magic')].copy()
+sample_point = sample_point.drop(total_drop_names, axis=1).drop('Normalized_margin', axis=1)
+
+
+# print(joined_data[joined_data['Year'] == "1950"][['FG3M_winner']])
 # extract features and labels
 # CHANGE THIS: Dropped columns with nan values because the models didn't like them
-X = data.drop(['Normalized_margin'], axis=1).dropna(axis=1, how='any')
+X = data.drop(['Normalized_margin'], axis=1)
 y = data['Normalized_margin'].values
+print(X.columns)
 
 # models
 Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.25)
@@ -58,24 +66,30 @@ print("Training Linear Regression")
 linear_model = LinearRegression()
 linear_model.fit(Xtr, ytr)
 y_pred = linear_model.predict(Xte)
-print("MAE:", metrics.mean_absolute_error(yte, y_pred))  
+print("MAE:", metrics.mean_absolute_error(yte, y_pred)) 
+
+print(sample_point.shape)
+sample_pred = linear_model.predict(sample_point)
+print(sample_pred)
+
+
 
 # MLP Regresion
 print("Training MLP Regression")
 # These params (taken from above) made it worse (0.21 w params vs 0.17 wo params)
 params = {
-    'hidden_layer_sizes' : (20,),
+    'hidden_layer_sizes' : (10),
     'alpha' : 0.5e-3,
     'max_iter' : 3000,
-    'verbose' : False
+    'verbose' : False,
 }
 mlp_model = MLPRegressor(**params)
 mlp_model.fit(Xtr, ytr)
 print("MAE:", metrics.mean_absolute_error(yte, mlp_model.predict(Xte)))
 
 # DT Regression
-print("Training DT Regression")
-dt_model = DecisionTreeRegressor()
+print("Training RF Regression")
+dt_model = RandomForestRegressor(n_estimators=200)
 dt_model.fit(Xtr, ytr)
 print("MAE:", metrics.mean_absolute_error(yte, dt_model.predict(Xte)))
 
