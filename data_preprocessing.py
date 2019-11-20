@@ -34,12 +34,18 @@ joined_data['home_team'] = joined_data.apply(calc_home_team, axis=1)
 
 # Normalize the margin by the number of games played in the series
 # Store this for later because pairwise_subtract removes this column
-joined_data['Normalized_margin'] = joined_data['Margin'] / joined_data['Winner Wins']
+def calc_norm_margin(row):
+    if row['home_team'] == row['Winner']:
+        return (row['Winner Wins'] + row['Margin'] - 1) / (row['Winner Wins'] * 2 - 1)
+    return (row['Winner Wins'] - row['Margin']) / (row['Winner Wins'] * 2 - 1)
+
+joined_data['Normalized_margin'] = joined_data.apply(calc_norm_margin, axis=1)
+# joined_data['Normalized_margin'] = joined_data['Margin'] / joined_data['Winner Wins']
 def pairwise_subtract(row):
     # Parse all numerical winner team stats
     winner_stats = row.filter(regex='_winner$')
     winner_stats = winner_stats[winner_stats.apply(lambda x: type(x) in [int, np.int64, float, np.float64])]
-
+    # print(winner_stats.columns)
     # Save our column names as they will be dropped to make this work
     cols = list(winner_stats.index)
     winner_stats.reset_index(drop=True, inplace=True)
@@ -52,12 +58,12 @@ def pairwise_subtract(row):
     # Subtract winner from loser
     pairwise = winner_stats.subtract(loser_stats)
 
-    pairwise['Normalized_margin'] = row['Normalized_margin']
-    cols.append('Normalized_margin')
-
     # Negate if necessary
     if row['home_team'] == row['Loser']:
         pairwise = -1*pairwise
+    
+    pairwise['Normalized_margin'] = row['Normalized_margin']
+    cols.append('Normalized_margin')
     
     additional_cols = ['Series', 'Year', 'home_team', 'Winner', 'Loser']
     for col in additional_cols:
@@ -69,5 +75,5 @@ def pairwise_subtract(row):
 
 # Pairwise subtract home team stats from away team stats
 joined_data = joined_data.apply(pairwise_subtract, axis=1, result_type='expand')
-
+print(joined_data[['Normalized_margin', 'home_team', 'Winner']])
 joined_data.reset_index(drop=True).to_feather('joined.data')

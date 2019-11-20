@@ -23,6 +23,7 @@ from sklearn import preprocessing
 from sklearn.utils import multiclass
 
 warnings.filterwarnings(action='ignore', category=ConvergenceWarning)
+warnings.filterwarnings(action='ignore', category=FutureWarning)
 
 # All of our available data
 joined_data = feather.read_dataframe('joined.data')
@@ -46,7 +47,7 @@ y = data['Normalized_margin']
 
 # Function for calculating win/loss accuracy from regression results
 def accuracy_score(y_pred, y_true):
-    return sum(np.sign(y_pred) == np.sign(y_true)) / len(y_pred)
+    return sum(np.sign(y_pred - 0.5) == np.sign(y_true - 0.5)) / len(y_pred)
 
 
 
