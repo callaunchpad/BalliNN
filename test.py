@@ -24,6 +24,7 @@ for i, game_id in enumerate(game_ids):
 	print('%d/%d' % (i+1, len(game_ids)))
 	if i % 50 == 0:
 		save_obj(advanced_stats, 'advanced_stats')
+save_obj(advanced_stats, 'advanced_stats')
 
 '''
 # join by game_id
