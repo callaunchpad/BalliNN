@@ -11,19 +11,32 @@ team_history = load_obj('team_history')
 print('find set of game ids...')
 game_ids = set()
 for team, history in team_history.items():
-	for _, game in history.iterrows():
-		game_ids.add(game['GAME_ID'])
+    for _, game in history.iterrows():
+        game_ids.add(game['GAME_ID'])
 
 # send request for advanced stats
 print('requesting advanced_stats...')
 advanced_stats = {}
+unfetched_game_ids = set()
+max_err_count = 5
 for i, game_id in enumerate(game_ids):
-	bs = BoxScoreAdvancedV2(game_id=game_id)
-	dfs = bs.get_data_frames()
-	advanced_stats[game_id] = dfs
-	print('%d/%d' % (i+1, len(game_ids)))
-	if i % 50 == 0:
-		save_obj(advanced_stats, 'advanced_stats')
+    err_count = 0
+    while True:
+       try:
+           bs = BoxScoreAdvancedV2(game_id=game_id)
+           dfs = bs.get_data_frames()
+           advanced_stats[game_id] = dfs
+           print('%d/%d' % (i+1, len(game_ids)))
+           if i % 50 == 0:
+               save_obj(advanced_stats, 'advanced_stats')
+       except:
+           err_count += 1
+           if err_count == max_error_count:
+               unfetched_game_ids.add(game_id)
+               save_obj(unfetched_game_ids, 'unfetched_game_ids')
+               break
+       else:
+           break
 save_obj(advanced_stats, 'advanced_stats')
 
 '''
