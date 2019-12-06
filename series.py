@@ -10,7 +10,6 @@ from pipeline import Model
 from sklearn.exceptions import ConvergenceWarning
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
-from sklearn.neural_network import MLPClassifier as MLP
 from sklearn.linear_model import Ridge
 from sklearn.ensemble import RandomForestRegressor, RandomForestClassifier
 from sklearn.neural_network import MLPRegressor
@@ -47,7 +46,7 @@ y = data['Normalized_margin']
 
 # Function for calculating win/loss accuracy from regression results
 def accuracy_score(y_pred, y_true):
-    return sum(np.sign(y_pred - 0.5) == np.sign(y_true - 0.5)) / len(y_pred)
+    return sum(np.sign(y_pred) == np.sign(y_true)) / len(y_pred)
 
 
 
