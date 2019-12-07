@@ -56,14 +56,17 @@ def pairwise_subtract(row):
     cols.append('Normalized_margin')
 
     # Negate if necessary
-    if row['home_team'] == row['Loser']:
+    if 'Loser' in row and row['home_team'] == row['Loser']:
         pairwise = -1*pairwise
     
     additional_cols = ['Series', 'Year', 'home_team', 'Winner', 'Loser']
+    added_cols = []
     for col in additional_cols:
-        pairwise[col] = row[col]
+        if col in row:
+            pairwise[col] = row[col]
+            added_cols.append(col)
 
-    cols.extend(additional_cols)
+    cols.extend(added_cols)
     
     return pd.Series(pairwise.values, index=cols)
 
