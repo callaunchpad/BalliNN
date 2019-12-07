@@ -48,7 +48,8 @@ for team, history in team_history.items():
 			win_loss = game['WL']
 			if home_team == game['TEAM_ABBREVIATION']:
 				home_win = win_loss
-			home_win = lookup[win_loss]
+			else:
+				home_win = lookup[win_loss]
 			data['home_win'] = home_win
 			if home_win is None: continue
 
