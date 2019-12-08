@@ -38,7 +38,7 @@ def get_pbp_df(game_id):
 
 def get_all_pbp_data_for_season(season):
     game_ids = get_game_ids_for_season(season)
-    game_ids = list(game_ids)[:2]
+    game_ids = list(game_ids)
     failures = set()
     all_dfs = []
     MAX_TRIES = 5
